@@ -1,2 +1,14 @@
 # YM4_Arduino
-The Arduino Library for the YM4 Mobile Robot platform.
+This is the Arduino library of the YM4 Mobile Robot platform. 
+
+## What is YM4?
+The YM4 is a mobile robot platform designed for robot amateurs and now is at its fourth generation. The YM4 is a cube with a size of 7.5cm * 7.5cm * 7.5 cm, which is the standard of the FIRA robot football competition. The robot uses a Arduino-compatiable microcontroller, AVR ATMega 328, so it can be programmed with the Arduino environment.
+
+## How to install the library?
+Download all the project files and extract the folder into $(Arduino_dir)\libraries, where Arduino_dir is the directory where your Arduino is installed.
+
+## How to use the library?
+The examples of the usage are included in the library. Once installed the library, you can find them in the Arduino IDE from File->Examples->YM4_Arduino.
+
+## More about YM4 and this library
+More information of the YM4 and the library could be found on my personal website: http://www.yfworld.com.
