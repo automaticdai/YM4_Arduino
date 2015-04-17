@@ -8,12 +8,13 @@
 #define LCTRL3_PIN		(7)
 
 /* Control pins for the right motor */
-#define RCTRL1_PIN		(10)	// for the older pcb, this was Pin 6
+#define RCTRL1_PIN		(10)	/**< NOTE: for older version pcb, 
+									this was Pin 6 */
 #define RCTRL2_PIN		(5)
 #define RCTRL3_PIN		(4)
 
 /* LED Pin */
-#define LED_PIN			(13)
+#define LED_PIN			(13)	/**< Pin number of the LED */
 
 /* Analog Input Pins */
 #define LMOTORI_PIN		(6)
@@ -23,8 +24,8 @@
 #define RMOTORV_PIN		(0)
 
 /* Interrupt Number */
-#define LPULSE_INT 		(1)		// interrupt of the left-side speed encoder
-#define RPULSE_INT 		(0)		// interrupt of the right-side speed encoder
+#define LPULSE_INT 		(1)		/**< interrupt of the left-side spd encoder */
+#define RPULSE_INT 		(0)		/**< interrupt of the right-side spd encoder */
 
 /* Motor Modes */
 #define M_LEFT     		(0)
@@ -40,7 +41,11 @@
 #define LED_ON			(1)
 #define LED_FLASH		(2)
 
-
+/**
+* This is the Class Wrapper of the YM4 Arduino Mobile Robot.
+* This class handles all the hardware of the YM4 platform and provides
+* easy-to-use APIs for different user applications.
+*/
 class YM4Class {
 public:
 	YM4Class() {;}
@@ -55,9 +60,11 @@ public:
 	static void periodicHandle(void);
 	
 private:
-	bool bLEDStatus;
 	void setMotorMode(int motor, int mode);
 	void setMotorPWM(int motor, unsigned char ucPwmVal);
+	
+	void spdEstimation(void) {;}
+	void posEstimation(void) {;}
 
 };
 
