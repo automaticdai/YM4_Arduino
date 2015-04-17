@@ -2,10 +2,12 @@
 	The Arduino Library
 	of YM4 Mobile Robot Platform
 	
+	Xiaotian Dai
 	YunFei Robotics Laboratory
-	http://www.yfworld.com/ym4
-	Version 0.1.1
-	April 15, 2015
+	http://www.yfworld.com/
+	
+	Version 0.1.1b
+	April 16, 2015
 */
 
 #include "../MsTimer2/MsTimer2.h"
@@ -13,9 +15,11 @@
 #include "ym4.h"
 
 /* Global variables for inter-process communication */
-int gnLPulseCnt = 0;	// pulse count of the left motor, write by YM4
-int gnRPulseCnt = 0; 	// pulse count of the right motor, write by YM4
-int gnTick = 0;			// global time counts every 20ms, write by periodTask()
+int gnLPulseCnt = 0;		// pulse count of the left motor, write by YM4
+int gnRPulseCnt = 0; 		// pulse count of the right motor, write by YM4
+int gnLTimePerPulse = 0; 	// 
+int gnRTimePerPulse = 0; 	// 
+int gnTick = 0;				// global timer counter, write by periodTask()
 
 bool gbLEDStatus = false;
 
@@ -42,7 +46,7 @@ void YM4Class::init(void) {
 	attachInterrupt(RPULSE_INT, &YM4Class::rPulseSapmle, FALLING);
 	
 	/* enable the timer interrupt */
-	MsTimer2::set(10, YM4Class::periodicHandle); // 10ms interrupt
+	MsTimer2::set(2, YM4Class::periodicHandle); // 2ms interrupt
 	MsTimer2::start();
 }
 
@@ -190,15 +194,52 @@ void YM4Class::rPulseSapmle(void) {
 }
 
 
-// this function will be executed every 10ms  
+void YM4Class::getSpeed(int &lSpd, int &rSpd) {
+	lSpd = gnLTimePerPulse;
+	rSpd = gnRTimePerPulse;
+}
+
+
+/* For speed calculation */
+int gnLPulseThis;
+int gnLPulseLast;
+int gnLTickLast;
+
+int gnRPulseThis;
+int gnRPulseLast;
+int gnRTickLast;
+
+// this function will be executed every 2ms  
 void YM4Class::periodicHandle(void) {
 	
 	gnTick++;
 	
+	gnLPulseThis = gnLPulseCnt;
+	gnRPulseThis = gnRPulseCnt;
+
+	if (gnLPulseThis != gnLPulseLast) {
+		if (gnLTickLast != 0) {
+			gnLTimePerPulse = gnTick - gnLTickLast;
+		}
+		gnLTickLast = gnTick;
+		gnLPulseLast = gnLPulseThis;
+	}
+
+	if (gnRPulseThis != gnRPulseLast) {
+		if (gnRTickLast != 0) {
+			gnRTimePerPulse = gnTick - gnRTickLast;
+		}
+		gnRTickLast = gnTick;
+		gnRPulseLast = gnRPulseThis;
+	}
+	
 	// flash the LED every 500ms
- 	if (gnTick % 50 == 0) {
+ 	if (gnTick % 250 == 0) {
 		gbLEDStatus = !gbLEDStatus;
 		gbLEDStatus? digitalWrite(LED_PIN, LOW) : digitalWrite(LED_PIN, HIGH);
+		
+		//gnLTimePerPulse = gnLPulseCnt;
+		//gnRTimePerPulse = gnRPulseCnt;
 	}
 	
 	

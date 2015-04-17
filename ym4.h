@@ -48,6 +48,7 @@ public:
 	void move(float speed);		// speed = [-1,1]
 	void turn(float speed);		// speed = [-1,1]
 	void led(int ledmode);
+	void getSpeed(int &lSpd, int &rSpd);
 	
 	static void lPulseSample(void);
 	static void rPulseSapmle(void);
