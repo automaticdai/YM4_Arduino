@@ -4,7 +4,7 @@
 * @author	Xiaotian Dai \n
 * 			Yunfei Robotics Laboratory \n
 * 			http://www.yfworld.com/
-* @version	0.1.2b
+* @version	0.1.3
 * @date		April 21, 2015
 * @{
 */
@@ -14,7 +14,7 @@
 #include "ym4.h"
 
 /** Set the period of the timer interrupt */
-#define PERIOD_MS				(2)
+#define PERIOD_MS				(1)
 
 /** Set the PWM frequency */
 #define PWM_FREQUENCY_INIT()	(TCCR2B = (TCCR2B & 0b11111000) | 0x02)		
@@ -58,7 +58,7 @@ void YM4Class::init(void) {
 
 	/* init LED */
 	pinMode(LED_PIN, OUTPUT);
-	bLEDStatus = false;
+	gbLEDStatus = false;
 	
 	/* hook the encoder pulse sampling interrupt */
 	attachInterrupt(LPULSE_INT, &YM4Class::lPulseSample, FALLING);
@@ -211,18 +211,18 @@ void YM4Class::setMotorPWM(int motor, unsigned char ucPwmVal) {
 void YM4Class::led(int ledmode) {
 	switch (ledmode) {
 		case LED_OFF:
-			bLEDStatus = false;
+			gbLEDStatus = false;
 			digitalWrite(LED_PIN, HIGH);
 			break;
 			
 		case LED_ON:
-			bLEDStatus = true;
+			gbLEDStatus = true;
 			digitalWrite(LED_PIN, LOW);
 			break;
 		
 		case LED_FLASH:
-			bLEDStatus = !bLEDStatus;
-			bLEDStatus? digitalWrite(LED_PIN, LOW) 
+			gbLEDStatus = !gbLEDStatus;
+			gbLEDStatus? digitalWrite(LED_PIN, LOW) 
 					  : digitalWrite(LED_PIN, HIGH);
 			break;
 	
@@ -269,8 +269,8 @@ void YM4Class::getSpeed(int &lSpd, int &rSpd) {
 * CLosed-loop speed PID controller
 */
 void YM4Class::spdController(void) {
-	int LRef = 30;
-	int RRef = 30;
+	int LRef = 15;
+	int RRef = 15;
 	int LErr = LRef - gnLTimePerPulse;
 	int RErr = RRef - gnRTimePerPulse;
 	
@@ -283,7 +283,16 @@ void YM4Class::spdController(void) {
 			gnLPWM++;
 		}
 	}
-	
+
+	if (RErr > 0) {
+		if (gnRPWM > 0) {
+			gnRPWM--;
+		}
+	} else {
+		if (gnRPWM < 255) {
+			gnRPWM++;
+		}
+	}
 	
 	/* set direction */
 	setMotorMode(M_LEFT, M_FORWARD);
@@ -313,4 +322,4 @@ void YM4Class::periodicHandle(void) {
 	}
 }
 
-/** @}*
+/** @}*/

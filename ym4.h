@@ -61,8 +61,8 @@ public:
 	static void spdController(void);
 	
 private:
-	void setMotorMode(int motor, int mode);
-	void setMotorPWM(int motor, unsigned char ucPwmVal);
+	static void setMotorMode(int motor, int mode);
+	static void setMotorPWM(int motor, unsigned char ucPwmVal);
 	
 	void spdEstimation(void) {;}
 	void posEstimation(void) {;}
