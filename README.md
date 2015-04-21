@@ -14,10 +14,12 @@ The examples of the usage are included in the library. Once installed the librar
 More information of the YM4 and the library could be found on my blog: http://www.yfworld.com.
 
 ## Release Note
-v0.1.2,  April 17, 2015: changed the comment style to support doxygen
+v0.1.2b, April 21, 2015: added experimental code of closed-loop speed control
+
+v0.1.2a, April 17, 2015: changed the comment style to support doxygen
 
 v0.1.1b, April 16, 2015: added the code to obtain the motor speed
 
-v0.1.1,  April 15, 2015: optimized the speed control code
+v0.1.1, April 15, 2015: optimized the speed control code
 
-v0.1,    March 22, 2015: init commit of the code
+v0.1, March 22, 2015: init commit of the code

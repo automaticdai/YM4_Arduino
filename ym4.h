@@ -58,6 +58,7 @@ public:
 	static void lPulseSample(void);
 	static void rPulseSapmle(void);
 	static void periodicHandle(void);
+	static void spdController(void);
 	
 private:
 	void setMotorMode(int motor, int mode);
