@@ -14,6 +14,8 @@ The examples of the usage are included in the library. Once installed the librar
 More information of the YM4 and the library could be found on my blog: http://www.yfworld.com.
 
 ## Release Note
+v0.1.4, April 22, 2015: converted the code from c++ into c
+
 v0.1.3, April 21, 2015: tested on the real hardware and corrected some compile errors
 
 v0.1.2b, April 21, 2015: added experimental code of closed-loop speed control

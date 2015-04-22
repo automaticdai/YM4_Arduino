@@ -4,8 +4,8 @@
 * @author	Xiaotian Dai \n
 * 			Yunfei Robotics Laboratory \n
 * 			http://www.yfworld.com/
-* @version	0.1.3
-* @date		April 21, 2015
+* @version	0.1.4
+* @date		April 22, 2015
 * @{
 */
 
@@ -13,36 +13,60 @@
 #include "../MsTimer2/MsTimer2.h"
 #include "ym4.h"
 
-/** Set the period of the timer interrupt */
-#define PERIOD_MS				(1)
-
-/** Set the PWM frequency */
-#define PWM_FREQUENCY_INIT()	(TCCR2B = (TCCR2B & 0b11111000) | 0x02)		
-
-/* Global variables for inter-process communication */
+/** 
+* @defgroup group2 Global_Variables
+* Global variables for inter-process communication
+* @{
+*/
 int gnLPulseCnt;			/**< pulse counter of the left motor encoder */ 
 int gnRPulseCnt; 			/**< pulse counter of the right motor encoder */
 
-int gnLTickLast;
-int gnRTickLast;
+int gnLTickLast;			/**< time instance of the last left pulse */
+int gnRTickLast;			/**< time instance of the last right pulse */
 
 int gnLTimePerPulse = 100; 	/**< time interval between two left pulses */
 int gnRTimePerPulse = 100; 	/**< time interval between two right pulses */
 
-int gnTick;					/**< global timer counter, adds every PERIOD_MS \n
-							// write by periodTask() */
+int gnTick;					/**< global timer counter, increases every \n
+							// PERIOD_MS in periodTask() */
 
-int gnLPWM;
-int gnRPWM;						
+int gnLPWM;					/**< the PWM value of the left motor: 0-255 */
+int gnRPWM;					/**< the PWM value of the right motor: 0-255 */	
 							
 							
-bool gbLEDStatus = false;	///< controls the status of the LED
+bool gbLEDStatus = false;	/**< controls the status of the LED
+/** @}*/
+
+
+/* Function Declaration */
+void YM4_init(void);
+void YM4_move(float speed);		// speed = [-1,1]
+void YM4_turn(float speed);		// speed = [-1,1]
+void YM4_led(int ledmode);
+void YM4_getSpeed(int &lSpd, int &rSpd);
+
+void YM4_lPulseSample(void);
+void YM4_rPulseSapmle(void);
+void YM4_periodicHandle(void);
+void YM4_spdController(void);
+
+
+void YM4_setMotorMode(int motor, int mode);
+void YM4_setMotorPWM(int motor, unsigned char ucPwmVal);
+
+void YM4_spdEstimation(void) {
+	;
+}
+
+void YM4_posEstimation(void) {
+	;
+}
 
 
 /** 
 * Init the YM4 hardware, including configurations of pins, LED & interrupts
 */
-void YM4Class::init(void) {
+void YM4_init(void) {
 	
 	/* this statement will change the PWM output frequency to 7.8 KHZ */
 	PWM_FREQUENCY_INIT();
@@ -61,11 +85,11 @@ void YM4Class::init(void) {
 	gbLEDStatus = false;
 	
 	/* hook the encoder pulse sampling interrupt */
-	attachInterrupt(LPULSE_INT, &YM4Class::lPulseSample, FALLING);
-	attachInterrupt(RPULSE_INT, &YM4Class::rPulseSapmle, FALLING);
+	attachInterrupt(LPULSE_INT, &YM4_lPulseSample, FALLING);
+	attachInterrupt(RPULSE_INT, &YM4_rPulseSapmle, FALLING);
 	
 	/* enable the timer interrupt */
-	MsTimer2::set(PERIOD_MS, YM4Class::periodicHandle); // periodic interrupt
+	MsTimer2::set(PERIOD_MS, YM4_periodicHandle); // periodic interrupt
 	MsTimer2::start();
 }
 
@@ -75,7 +99,7 @@ void YM4Class::init(void) {
 * @param[in] speed: = [-1,+1]
 * @see YM4Class::turn()
 */
-void YM4Class::move(float speed) {
+void YM4_move(float speed) {
 	int nPWMVal;
 	
 	/* trim the input */
@@ -89,18 +113,18 @@ void YM4Class::move(float speed) {
 	
 	/* set direction */
 	if (speed > 0) {
-		setMotorMode(M_LEFT, M_FORWARD);
-		setMotorMode(M_RIGHT, M_FORWARD);
+		YM4_setMotorMode(M_LEFT, M_FORWARD);
+		YM4_setMotorMode(M_RIGHT, M_FORWARD);
 	} else if (speed < 0) {
-		setMotorMode(M_LEFT, M_BACKWARD);
-		setMotorMode(M_RIGHT, M_BACKWARD);
+		YM4_setMotorMode(M_LEFT, M_BACKWARD);
+		YM4_setMotorMode(M_RIGHT, M_BACKWARD);
 		speed = -1 * speed;
 	}
 
 	/* set speed */
 	nPWMVal = (int)(speed * 255);
-	setMotorPWM(M_LEFT, nPWMVal);
-	setMotorPWM(M_RIGHT, nPWMVal);
+	YM4_setMotorPWM(M_LEFT, nPWMVal);
+	YM4_setMotorPWM(M_RIGHT, nPWMVal);
 	
 }
 
@@ -111,7 +135,7 @@ void YM4Class::move(float speed) {
 * @param[in] speed: = [-1,+1]
 * @see YM4Class::move()
 */
-void YM4Class::turn(float speed) {
+void YM4_turn(float speed) {
 	int nPWMVal;
 	
 	/* trim the input */
@@ -125,18 +149,18 @@ void YM4Class::turn(float speed) {
 	
 	/* set direction */
 	if (speed > 0) {
-		setMotorMode(M_LEFT, M_BACKWARD);
-		setMotorMode(M_RIGHT, M_FORWARD);
+		YM4_setMotorMode(M_LEFT, M_BACKWARD);
+		YM4_setMotorMode(M_RIGHT, M_FORWARD);
 	} else {
-		setMotorMode(M_LEFT, M_FORWARD);
-		setMotorMode(M_RIGHT, M_BACKWARD);
+		YM4_setMotorMode(M_LEFT, M_FORWARD);
+		YM4_setMotorMode(M_RIGHT, M_BACKWARD);
 		speed = -1 * speed;
 	}
 	
 	/* set speed */
 	nPWMVal = (int)(speed * 255);
-	setMotorPWM(M_LEFT, nPWMVal);
-	setMotorPWM(M_RIGHT, nPWMVal);	
+	YM4_setMotorPWM(M_LEFT, nPWMVal);
+	YM4_setMotorPWM(M_RIGHT, nPWMVal);	
 }
 
 
@@ -146,7 +170,7 @@ void YM4Class::turn(float speed) {
 * @param[in] mode: = {M_BACKWARD, M_FORWARD, M_BRAKE, M_FLOAT}
 * @see YM4Class::move()
 */
-void YM4Class::setMotorMode(int motor, int mode) {
+void YM4_setMotorMode(int motor, int mode) {
 
 	int Ctrl1, Ctrl2, Ctrl3;
 
@@ -196,7 +220,7 @@ void YM4Class::setMotorMode(int motor, int mode) {
 * @param[in] motor: {M_LEFT, M_RIGHT}
 * @param[in] usPwmVal: 0 - 255
 */
-void YM4Class::setMotorPWM(int motor, unsigned char ucPwmVal) {
+void YM4_setMotorPWM(int motor, unsigned char ucPwmVal) {
 	if (motor == M_LEFT) {
 		analogWrite(LCTRL1_PIN, ucPwmVal);
 	} else {
@@ -208,7 +232,7 @@ void YM4Class::setMotorPWM(int motor, unsigned char ucPwmVal) {
 /**
 *
 */
-void YM4Class::led(int ledmode) {
+void YM4_led(int ledmode) {
 	switch (ledmode) {
 		case LED_OFF:
 			gbLEDStatus = false;
@@ -233,7 +257,7 @@ void YM4Class::led(int ledmode) {
 /**
 *
 */
-void YM4Class::lPulseSample(void) {
+void YM4_lPulseSample(void) {
 	gnLPulseCnt++;
 	if (gnLTickLast != 0) {
 		gnLTimePerPulse = (gnTick - gnLTickLast) * PERIOD_MS;
@@ -245,7 +269,7 @@ void YM4Class::lPulseSample(void) {
 /**
 *
 */
-void YM4Class::rPulseSapmle(void) {
+void YM4_rPulseSapmle(void) {
 	gnRPulseCnt++;
 	if (gnRTickLast != 0) {
 		gnRTimePerPulse = (gnTick - gnRTickLast) * PERIOD_MS;
@@ -259,7 +283,7 @@ void YM4Class::rPulseSapmle(void) {
 * @param[in,out] lSpd: Left motor speed
 * @param[in,out] rSpd: Right motor speed
 */
-void YM4Class::getSpeed(int &lSpd, int &rSpd) {
+void YM4_getSpeed(int &lSpd, int &rSpd) {
 	lSpd = gnLTimePerPulse;
 	rSpd = gnRTimePerPulse;
 }
@@ -268,7 +292,7 @@ void YM4Class::getSpeed(int &lSpd, int &rSpd) {
 /**
 * CLosed-loop speed PID controller
 */
-void YM4Class::spdController(void) {
+void YM4_spdController(void) {
 	int LRef = 15;
 	int RRef = 15;
 	int LErr = LRef - gnLTimePerPulse;
@@ -295,24 +319,24 @@ void YM4Class::spdController(void) {
 	}
 	
 	/* set direction */
-	setMotorMode(M_LEFT, M_FORWARD);
-	setMotorMode(M_RIGHT, M_FORWARD);
+	YM4_setMotorMode(M_LEFT, M_FORWARD);
+	YM4_setMotorMode(M_RIGHT, M_FORWARD);
 
 	/* set speed */
-	setMotorPWM(M_LEFT, gnLPWM);
-	setMotorPWM(M_RIGHT, gnRPWM);
+	YM4_setMotorPWM(M_LEFT, gnLPWM);
+	YM4_setMotorPWM(M_RIGHT, gnRPWM);
 }
 
 /**
 * this function will be executed every PERIOD_MS 
 */  
-void YM4Class::periodicHandle(void) {
+void YM4_periodicHandle(void) {
 	
 	gnTick++;
 	
 	// control the system every 20ms (50Hz)
 	if (gnTick % (20/PERIOD_MS) == 0) {
-		spdController();
+		YM4_spdController();
 	}	
 	
 	// flash the LED every 500ms
