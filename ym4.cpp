@@ -4,7 +4,7 @@
 * @author	Xiaotian Dai \n
 * 			Yunfei Robotics Laboratory \n
 * 			http://www.yfworld.com/
-* @version	0.1.4
+* @version	0.1.4a
 * @date		April 22, 2015
 * @{
 */
@@ -34,33 +34,8 @@ int gnLPWM;					/**< the PWM value of the left motor: 0-255 */
 int gnRPWM;					/**< the PWM value of the right motor: 0-255 */	
 							
 							
-bool gbLEDStatus = false;	/**< controls the status of the LED
+bool gbLEDStatus = false;	/**< controls the status of the LED */
 /** @}*/
-
-
-/* Function Declaration */
-void YM4_init(void);
-void YM4_move(float speed);		// speed = [-1,1]
-void YM4_turn(float speed);		// speed = [-1,1]
-void YM4_led(int ledmode);
-void YM4_getSpeed(int &lSpd, int &rSpd);
-
-void YM4_lPulseSample(void);
-void YM4_rPulseSapmle(void);
-void YM4_periodicHandle(void);
-void YM4_spdController(void);
-
-
-void YM4_setMotorMode(int motor, int mode);
-void YM4_setMotorPWM(int motor, unsigned char ucPwmVal);
-
-void YM4_spdEstimation(void) {
-	;
-}
-
-void YM4_posEstimation(void) {
-	;
-}
 
 
 /** 
@@ -69,7 +44,7 @@ void YM4_posEstimation(void) {
 void YM4_init(void) {
 	
 	/* this statement will change the PWM output frequency to 7.8 KHZ */
-	PWM_FREQUENCY_INIT();
+	//PWM_FREQUENCY_INIT();
 	
 	/* init Motor Control pin */
 	pinMode(LCTRL1_PIN, OUTPUT);
@@ -97,7 +72,7 @@ void YM4_init(void) {
 /** 
 * Control the linear speed of the YM4.
 * @param[in] speed: = [-1,+1]
-* @see YM4Class::turn()
+* @see YM4_turn()
 */
 void YM4_move(float speed) {
 	int nPWMVal;
@@ -283,9 +258,9 @@ void YM4_rPulseSapmle(void) {
 * @param[in,out] lSpd: Left motor speed
 * @param[in,out] rSpd: Right motor speed
 */
-void YM4_getSpeed(int &lSpd, int &rSpd) {
-	lSpd = gnLTimePerPulse;
-	rSpd = gnRTimePerPulse;
+void YM4_getSpeed(int *lSpd, int *rSpd) {
+	*lSpd = gnLTimePerPulse;
+	*rSpd = gnRTimePerPulse;
 }
 
 
@@ -327,8 +302,27 @@ void YM4_spdController(void) {
 	YM4_setMotorPWM(M_RIGHT, gnRPWM);
 }
 
+
 /**
-* this function will be executed every PERIOD_MS 
+* (this function is optional, only valid with the IMU module)
+* estimate the current state (spd_x, spd_y, acc_x, acc_y, ang_z) from the IMU
+*/
+void YM4_stateEstimation(void) {
+	;
+}
+
+
+/**
+* (this function is optional, only valid with the IMU module)
+* estimate the current position based on the IMU measurements 
+*/
+void YM4_posEstimation(void) {
+	;
+}
+
+
+/**
+* this handle will be executed every PERIOD_MS 
 */  
 void YM4_periodicHandle(void) {
 	
@@ -345,5 +339,4 @@ void YM4_periodicHandle(void) {
 		gbLEDStatus? digitalWrite(LED_PIN, LOW) : digitalWrite(LED_PIN, HIGH);
 	}
 }
-
 /** @}*/
