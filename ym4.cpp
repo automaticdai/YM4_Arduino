@@ -1,13 +1,14 @@
 /** 
-* @defgroup group1 YM4_Class
-*			The Arduino Library of YM4 Mobile Robot Platform
+* @defgroup group1 YM4_Library
+*			The Arduino Library of the YM4 Mobile Robot Platform
 * @author	Xiaotian Dai \n
 * 			Yunfei Robotics Laboratory \n
 * 			http://www.yfworld.com/
-* @version	0.1.4a
-* @date		April 22, 2015
+* @version	0.1.5a
+* @date		April 24, 2015
 * @{
 */
+
 
 #include <Arduino.h>
 #include "../MsTimer2/MsTimer2.h"
@@ -16,8 +17,7 @@
 /** 
 * @defgroup group2 Global_Variables
 * Global variables for inter-process communication
-* @{
-*/
+* @{ */
 int gnLPulseCnt;			/**< pulse counter of the left motor encoder */ 
 int gnRPulseCnt; 			/**< pulse counter of the right motor encoder */
 
@@ -293,19 +293,19 @@ void YM4_spdController(void) {
 		}
 	}
 	
-	/* set direction */
+	/* set motor direction */
 	YM4_setMotorMode(M_LEFT, M_FORWARD);
 	YM4_setMotorMode(M_RIGHT, M_FORWARD);
 
-	/* set speed */
+	/* set motor speed */
 	YM4_setMotorPWM(M_LEFT, gnLPWM);
 	YM4_setMotorPWM(M_RIGHT, gnRPWM);
 }
 
 
 /**
-* (this function is optional, only valid with the IMU module)
 * estimate the current state (spd_x, spd_y, acc_x, acc_y, ang_z) from the IMU
+* (this function is optional, only valid with the IMU module)
 */
 void YM4_stateEstimation(void) {
 	;
@@ -313,22 +313,47 @@ void YM4_stateEstimation(void) {
 
 
 /**
-* (this function is optional, only valid with the IMU module)
 * estimate the current position based on the IMU measurements 
+* (this function is optional, only valid with the IMU module)
 */
 void YM4_posEstimation(void) {
 	;
 }
 
 
+void YM4_voltageSampling(void) {
+	;
+}
+
+
+void YM4_currentSampling(void) {
+	;
+}
+
+
+void YM4_getVoltage(void) {
+	;
+}
+
+
+void YM4_getCurrent(void) {
+	;
+}
+
+
+void YM4_faultHandle(void) {
+	;
+}
+
+
 /**
-* this handle will be executed every PERIOD_MS 
+* this timer handle will be executed every PERIOD_MS 
 */  
 void YM4_periodicHandle(void) {
 	
 	gnTick++;
 	
-	// control the system every 20ms (50Hz)
+	// invoke the controller every 20ms (50Hz)
 	if (gnTick % (20/PERIOD_MS) == 0) {
 		YM4_spdController();
 	}	

@@ -1,7 +1,9 @@
 #ifndef __YM4_H_INCLUDED
 #define __YM4_H_INCLUDED
 
-/* Pin Table */
+/**
+* @defgroup pin_group Pins Defination
+* @{ */
 /* Control pins for the left motor */
 #define LCTRL1_PIN		(9)
 #define LCTRL2_PIN		(8)
@@ -22,6 +24,7 @@
 
 #define RMOTORI_PIN		(7)		/**< (right) motor current analog sampling */
 #define RMOTORV_PIN		(0)		/**< (right) motor voltage analog sampling */
+/**@}*/
 
 
 /* Interrupt Number */
@@ -29,8 +32,10 @@
 #define RPULSE_INT 		(0)		/**< interrupt of the right-side spd encoder */
 
 
-
-/* Motor-related Macros */
+/**
+* @defgroup motor_group Motor_Modes
+* Defines the modes of the motor
+* @{ */
 #define M_LEFT     		(0)		/**< specify the left motor */
 #define M_RIGHT    		(1)		/**< specify the right motor */
 
@@ -38,12 +43,17 @@
 #define M_BACKWARD 		(2)
 #define M_BRAKE    		(3)
 #define M_FLOAT    		(4)
+/**@}*/
 
 
-/* LED Modes */
+/**
+* @defgroup led_group LED_Modes
+* The modes of the LED
+* @{ */
 #define LED_OFF			(0)
 #define LED_ON			(1)
 #define LED_FLASH		(2)
+/**@}*/
 
 
 /** Set the period of the timer interrupt */
@@ -53,7 +63,22 @@
 /** Set the PWM frequency */
 #define PWM_FREQUENCY_INIT()	(TCCR2B = (TCCR2B & 0b11111000) | 0x02)	
 
+/* Function Declaration */
+void YM4_init(void);
+void YM4_move(float speed);		// speed = [-1,1]
+void YM4_turn(float speed);		// speed = [-1,1]
+void YM4_led(int ledmode);
+void YM4_getSpeed(int &lSpd, int &rSpd);
 
+void YM4_lPulseSample(void);
+void YM4_rPulseSapmle(void);
+void YM4_periodicHandle(void);
+void YM4_spdController(void);
+
+void YM4_setMotorMode(int motor, int mode);
+void YM4_setMotorPWM(int motor, unsigned char ucPwmVal);
+void YM4_spdEstimation(void);
+void YM4_posEstimation(void);
 
 /**
 * This is the Class Wrapper of the YM4 Arduino Mobile Robot.
